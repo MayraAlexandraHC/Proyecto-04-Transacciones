@@ -1,0 +1,157 @@
+openapi: 3.0.3
+info:
+  title: API de Transacciones Bancarias
+  description: API para la gestión de transacciones bancarias
+  version: 1.0.0
+paths:
+  /transacciones/deposito:
+    post:
+      summary: Registrar una transacción de depósito
+      operationId: crearDeposito
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SolicitudTransaccion'
+      responses:
+        '200':
+          description: Operación exitosa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaccion'
+        '400':
+          description: Solicitud inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /transacciones/retiro:
+    post:
+      summary: Registrar una transacción de retiro
+      operationId: crearRetiro
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SolicitudTransaccion'
+      responses:
+        '200':
+          description: Operación exitosa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaccion'
+        '400':
+          description: Solicitud inválida o fondos insuficientes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /transacciones/transferencia:
+    post:
+      summary: Registrar una transacción de transferencia
+      operationId: crearTransferencia
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SolicitudTransferencia'
+      responses:
+        '200':
+          description: Operación exitosa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaccion'
+        '400':
+          description: Solicitud inválida o fondos insuficientes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /transacciones/historial/{idCuenta}:
+    get:
+      summary: Obtener historial de transacciones de una cuenta
+      operationId: obtenerHistorialTransacciones
+      parameters:
+        - name: idCuenta
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Operación exitosa
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Transaccion'
+
+components:
+  schemas:
+    SolicitudTransaccion:
+      type: object
+      required:
+        - monto
+        - idCuentaOrigen
+      properties:
+        monto:
+          type: number
+          format: double
+          minimum: 0
+        idCuentaOrigen:
+          type: string
+
+    SolicitudTransferencia:
+      type: object
+      required:
+        - monto
+        - idCuentaOrigen
+        - idCuentaDestino
+      properties:
+        monto:
+          type: number
+          format: decimal
+          minimum: 0
+        idCuentaOrigen:
+          type: string
+        idCuentaDestino:
+          type: string
+
+    Transaccion:
+      type: object
+      properties:
+        id:
+          type: string
+        tipo:
+          type: string
+          enum: [DEPOSITO, RETIRO, TRANSFERENCIA]
+        monto:
+          type: number
+          format: decimal
+        fecha:
+          type: string
+          format: date-time
+        idCuentaOrigen:
+          type: string
+        idCuentaDestino:
+          type: string
+        estado:
+          type: string
+
+    Error:
+      type: object
+      properties:
+        codigo:
+          type: string
+        mensaje:
+          type: string
